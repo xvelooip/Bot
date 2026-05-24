@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram Studio Wallpaper Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #050308;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            padding-bottom: 40px;
+        }
+
+        :root {
+            --accent-color: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --bg-main: #0b0813;
+            --header-color: #120e24;
+            --msg-in: #1b1632;
+            --text-in: #ffffff;
+            --text-out: #ffffff;
+            --sub-text: #94a3b8;
+            --sidebar-bg: #0f0c1b;
+            --sidebar-text: #ffffff;
+            --panel-glass: rgba(15, 11, 28, 0.75);
+            --radius: 16px;
+            --msg-radius: 14px;
+        }
+
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background: radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 10% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+            transition: all 0.5s ease;
+        }
+
+        header {
+            padding: 20px 16px;
+            text-align: center;
+            background: rgba(5, 3, 8, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        header h1 {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #fff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .wrapper {
+            padding: 16px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .glass-panel {
+            background: var(--panel-glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+
+        .panel-section-title {
+            font-size: 13px;
+            margin-bottom: 16px;
+            color: #c084fc;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .panel-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(192, 132, 252, 0.3), transparent);
+        }
+
+        .switcher-container {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .switch-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .switch-tab.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* ИНТЕРАКТИВНЫЙ МАКЕТ С ПОДДЕРЖКОЙ ФОТОГРАФИИ */
+        .phone-mockup {
+            background: var(--bg-main);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.7);
+            position: relative;
+        }
+
+        .status-bar {
+            background: var(--header-color);
+            padding: 4px 14px 0 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: monospace;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tg-header {
+            background: var(--header-color);
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            position: relative;
+            z-index: 10;
+        }
+
+        .burger-icon {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            width: 16px;
+        }
+        .burger-icon span { height: 2px; background: #fff; border-radius: 1px; }
+
+        /* Экран Списка чатов */
+        #view-chats { display: block; position: relative; z-index: 5; background: rgba(11, 8, 19, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .avatar-circle { width: 42px; height: 42px; background: var(--accent-color); border-radius: 50%; box-shadow: 0 2px 8px var(--accent-glow); }
+        .chat-body { flex: 1; overflow: hidden; }
+        .chat-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .chat-user-name { font-size: 13.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+        .chat-timestamp { font-size: 10.5px; color: var(--sub-text); }
+        .chat-row-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .chat-text-preview { font-size: 12px; color: var(--sub-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 85%; }
+        .badge-counter { background: var(--accent-color); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+
+        /* Экран Окна сообщений */
+        #view-messages { display: none; padding: 14px; flex-direction: column; gap: 12px; min-height: 220px; position: relative; z-index: 5; background: rgba(11, 8, 19, 0.2); }
+        .bubble { max-width: 78%; padding: 10px 12px; font-size: 12.5px; line-height: 1.45; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        .bubble.inc {
+            background: var(--msg-in);
+            color: var(--text-in);
+            align-self: flex-start;
+            border-radius: var(--msg-radius);
+            border-bottom-left-radius: 4px;
+        }
+        .bubble.out {
+            background: var(--accent-color);
+            color: var(--text-out);
+            align-self: flex-end;
+            border-radius: var(--msg-radius);
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 3px 10px var(--accent-glow);
+        }
+        .bubble-meta { font-size: 9px; text-align: right; margin-top: 4px; opacity: 0.6; }
+
+        /* Экран Бокового меню */
+        #view-sidebar { display: none; min-height: 220px; background: rgba(0,0,0,0.4); position: relative; z-index: 6; }
+        .sidebar-drawer { width: 80%; background: var(--sidebar-bg); min-height: 220px; border-right: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-profile { background: var(--header-color); padding: 16px 14px; }
+        .sidebar-avatar { width: 44px; height: 44px; background: var(--accent-color); border-radius: 50%; margin-bottom: 10px; }
+        .sidebar-username { font-size: 13px; font-weight: bold; color: var(--sidebar-text); }
+        .sidebar-phone { font-size: 11px; color: var(--sub-text); margin-top: 2px; }
+        .sidebar-menu-list { padding: 8px 0; }
+        .sidebar-menu-item { padding: 10px 16px; font-size: 12.5px; color: var(--sidebar-text); display: flex; align-items: center; gap: 12px; }
+        .sidebar-menu-item.active { background: rgba(255,255,255,0.04); color: var(--accent-color); font-weight: 600; }
+        .sidebar-icon-mock { width: 16px; height: 16px; background: currentColor; opacity: 0.3; border-radius: 4px; }
+
+        /* Элементы управления палитрой */
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .control-row span { font-size: 12px; color: #e2e8f0; font-weight: 500; }
+        .inputs-group { display: flex; align-items: center; gap: 6px; }
+
+        .hex-field {
+            width: 76px;
+            padding: 6px;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 11px;
+            font-family: monospace;
+            text-align: center;
+            outline: none;
+        }
+
+        .color-dot-picker {
+            -webkit-appearance: none;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+        .color-dot-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-dot-picker::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.15); border-radius: 50%; }
+
+        /* Кнопка выбора файла */
+        .file-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #c084fc;
+            font-weight: 600;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .file-upload-btn:active { background: rgba(255, 255, 255, 0.1); }
+
+        .grid-presets {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .btn-preset {
+            padding: 8px 2px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.06);
+            height: 4px;
+            border-radius: 2px;
+            outline: none;
+            margin: 8px 0 14px 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .action-button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13.5px;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .action-button:active { transform: scale(0.99); }
+
+        .output-textarea {
+            background: #000;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 10.5px;
+            color: #34d399;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg" id="core-ambient"></div>
+
+    <header>
+        <h1>Telegram Studio Wallpaper Pro</h1>
+    </header>
+
+    <div class="wrapper">
+        
+        <!-- НАВИГАЦИЯ ПРЕВЬЮ -->
+        <div class="switcher-container">
+            <div class="switch-tab active" id="tab-c" onclick="changePreview('chats')">Диалоги</div>
+            <div class="switch-tab" id="tab-m" onclick="changePreview('messages')">Окно чата</div>
+            <div class="switch-tab" id="tab-s" onclick="changePreview('sidebar')">Меню</div>
+        </div>
+
+        <!-- ИНТЕРАКТИВНЫЙ МАКЕТ СМАРТФОНА -->
+        <div class="phone-mockup" id="phone-bg-preview">
+            <div class="status-bar" id="ui-status-bar">
+                <div>18:50</div>
+                <div style="display:flex; gap: 4px;">⚡ 84%</div>
+            </div>
+            
+            <div class="tg-header" id="ui-header">
+                <div class="burger-icon"><span></span><span></span><span></span></div>
+                <div style="font-size: 15px; font-weight: 700; color: #fff;" id="ui-header-title">Telegram</div>
+            </div>
+
+            <!-- ЭКРАН 1: СПИСОК ЧАТОВ -->
+            <div id="view-chats">
+                <div class="chat-item" onclick="changePreview('messages')">
+                    <div class="avatar-circle"></div>
+                    <div class="chat-body">
+                        <div class="chat-row-top">
+                            <span class="chat-user-name">Павел Дуров</span>
+                            <span class="chat-timestamp">18:50</span>
+                        </div>
+                        <div class="chat-row-bottom">
+                            <span class="chat-text-preview">Фон интегрирован в бинарный код темы!</span>
+                            <span class="badge-counter">1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-item" onclick="changePreview('sidebar')">
+                    <div class="avatar-circle" style="filter: hue-rotate(90deg); opacity: 0.8;"></div>
+                    <div class="chat-body">
+                        <div class="chat-row-top">
+                            <span class="chat-user-name">Команда Telegram</span>
+                            <span class="chat-timestamp">Вчера</span>
+                        </div>
+                        <div class="chat-row-bottom">
+                            <span class="chat-text-preview" style="color: var(--accent-color);">Обои теперь пакуются в Base64.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ЭКРАН 2: ОКНО ЧАТА -->
+            <div id="view-messages">
+                <div class="bubble inc">
+                    Привет! Теперь ты можешь загрузить картинку ниже, и она вставится прямо в файл темы!
+                    <div class="bubble-meta">18:48</div>
+                </div>
+                <div class="bubble out">
+                    Ого, то есть при установке темы на телефоне обои поставятся автоматически? 🖼️
+                    <div class="bubble-meta">18:49</div>
+                </div>
+                <div class="bubble inc">
+                    Именно! Скрипт сжимает картинку и кодирует её прямо внутрь выходного файла.
+                    <div class="bubble-meta">18:50</div>
+                </div>
+            </div>
+
+            <!-- ЭКРАН 3: БОКОВОЕ МЕНЮ -->
+            <div id="view-sidebar">
+                <div class="sidebar-drawer">
+                    <div class="sidebar-profile" id="ui-side-profile">
+                        <div class="sidebar-avatar"></div>
+                        <div class="sidebar-username">Разработчик</div>
+                        <div class="sidebar-phone">+7 (999) 000-XX-XX</div>
+                    </div>
+                    <div class="sidebar-menu-list">
+                        <div class="sidebar-menu-item active">
+                            <div class="sidebar-icon-mock"></div>
+                            <span>Создать тему</span>
+                        </div>
+                        <div class="sidebar-menu-item">
+                            <div class="sidebar-icon-mock"></div>
+                            <span>Контакты</span>
+                        </div>
+                        <div class="sidebar-menu-item">
+                            <div class="sidebar-icon-mock"></div>
+                            <span>Настройки</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- СЕКЦИЯ НАСТРОЕК -->
+        <div class="glass-panel">
+            
+            <div class="panel-section-title">Задний фон (Обои)</div>
+            
+            <!-- Загрузчик фотографии -->
+            <label class="file-upload-btn" for="image-loader">
+                🖼️ Выбрать фото для фона темы
+            </label>
+            <input type="file" id="image-loader" accept="image/*" style="display: none;" onchange="processWallpaperImage(this)">
+
+            <div class="panel-section-title">Готовые палитры баз</div>
+            <div class="grid-presets">
+                <div class="btn-preset" onclick="setPreset('#6366f1', '#0b0813', '#120e24', '#1b1632', '#ffffff', '#ffffff', '#0f0c1b', '#ffffff', '#94a3b8')">Neon</div>
+                <div class="btn-preset" onclick="setPreset('#f43f5e', '#0a0507', '#140b10', '#1f1018', '#fff1f2', '#ffffff', '#0d070a', '#ffffff', '#f43f5e')">Ruby</div>
+                <div class="btn-preset" onclick="setPreset('#10b981', '#040906', '#09140e', '#102419', '#ecfdf5', '#ffffff', '#060d09', '#ffffff', '#10b981')">Matrix</div>
+                <div class="btn-preset" onclick="setPreset('#eab308', '#0c0a02', '#181404', '#241e06', '#fefce8', '#ffffff', '#100d03', '#ffffff', '#eab308')">Amber</div>
+                <div class="btn-preset" onclick="generateRandomPalette()">✨ Рандом</div>
+            </div>
+
+            <div class="panel-section-title">Тонкая настройка палитры</div>
+
+            <div class="control-row">
+                <span>Главный акцент (Кнопки, бейджи):</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-accent" value="#6366f1" oninput="sync('accent', this.value)">
+                    <input type="color" id="pick-accent" value="#6366f1" class="color-dot-picker" oninput="sync('accent', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Основной фон (если нет фото):</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-bg" value="#0b0813" oninput="sync('bg', this.value)">
+                    <input type="color" id="pick-bg" value="#0b0813" class="color-dot-picker" oninput="sync('bg', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Верхняя панель (Header):</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-header" value="#120e24" oninput="sync('header', this.value)">
+                    <input type="color" id="pick-header" value="#120e24" class="color-dot-picker" oninput="sync('header', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Входящие облачка:</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-in" value="#1b1632" oninput="sync('in', this.value)">
+                    <input type="color" id="pick-in" value="#1b1632" class="color-dot-picker" oninput="sync('in', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Текст входящих сообщений:</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-text-in" value="#ffffff" oninput="sync('text-in', this.value)">
+                    <input type="color" id="pick-text-in" value="#ffffff" class="color-dot-picker" oninput="sync('text-in', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Текст исходящих сообщений:</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-text-out" value="#ffffff" oninput="sync('text-out', this.value)">
+                    <input type="color" id="pick-text-out" value="#ffffff" class="color-dot-picker" oninput="sync('text-out', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Фон бокового меню (Sidebar):</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-side-bg" value="#0f0c1b" oninput="sync('side-bg', this.value)">
+                    <input type="color" id="pick-side-bg" value="#0f0c1b" class="color-dot-picker" oninput="sync('side-bg', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Текст бокового меню:</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-side-txt" value="#ffffff" oninput="sync('side-txt', this.value)">
+                    <input type="color" id="pick-side-txt" value="#ffffff" class="color-dot-picker" oninput="sync('side-txt', this.value)">
+                </div>
+            </div>
+
+            <div class="control-row">
+                <span>Служебный текст (Время, инфо):</span>
+                <div class="inputs-group">
+                    <input type="text" id="hex-sub" value="#94a3b8" oninput="sync('sub', this.value)">
+                    <input type="color" id="pick-sub" value="#94a3b8" class="color-dot-picker" oninput="sync('sub', this.value)">
+                </div>
+            </div>
+
+            <div class="panel-section-title" style="margin-top: 14px;">Геометрия интерфейса</div>
+            <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Скругление углов сообщений:</label>
+            <input type="range" id="radius-range" min="0" max="24" value="14" oninput="compileLiveRenderer()">
+
+            <button class="action-button" onclick="buildAndExportTheme()">Сгенерировать файл темы</button>
+            <a id="download-anchor" style="display:none;" download="wallpaper_pro_theme.attheme">Скачать</a>
+            
+            <div class="output-textarea" id="output-log"></div>
+        </div>
+    </div>
+
+    <!-- Скрытый холст для оптимизации и компрессии картинки в Base64 -->
+    <canvas id="compressor-canvas" style="display: none;"></canvas>
+
+    <script>
+        // Глобальная переменная для хранения Base64 кода фотографии
+        let rawWallpaperBase64 = "";
+
+        // Переключение экранов превью смартфона
+        function changePreview(view) {
+            const vc = document.getElementById('view-chats');
+            const vm = document.getElementById('view-messages');
+            const vs = document.getElementById('view-sidebar');
+            const tc = document.getElementById('tab-c');
+            const tm = document.getElementById('tab-m');
+            const ts = document.getElementById('tab-s');
+            const title = document.getElementById('ui-header-title');
+
+            vc.style.display = 'none';
+            vm.style.display = 'none';
+            vs.style.display = 'none';
+            tc.classList.remove('active');
+            tm.classList.remove('active');
+            ts.classList.remove('active');
+
+            if(view === 'chats') {
+                vc.style.display = 'block';
+                tc.classList.add('active');
+                title.innerText = "Telegram";
+            } else if(view === 'messages') {
+                vm.style.display = 'flex';
+                tm.classList.add('active');
+                title.innerText = "Павел Дуров";
+            } else {
+                vs.style.display = 'block';
+                ts.classList.add('active');
+                title.innerText = "Опции";
+            }
+        }
+
+        // Обработка и сжатие загруженного изображения
+        function processWallpaperImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvas = document.getElementById('compressor-canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // Задаем оптимальный мобильный размер для обоев, чтобы файл темы не весил 20МБ
+                        const maxW = 720;
+                        const maxH = 1280;
+                        let w = img.width;
+                        let h = img.height;
+
+                        if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+                        if (h > maxH) { w = Math.round((w * maxH) / h); h = maxH; }
+
+                        canvas.width = w;
+                        canvas.height = h;
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        // Экспортируем в JPG с качеством 0.7 (оптимальный баланс четкости и веса файла)
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // Устанавливаем в интерактивное превью макета телефона
+                        document.getElementById('phone-bg-preview').style.backgroundImage = `url(${compressedDataUrl})`;
+                        
+                        // Извлекаем чистую строку Base64 без технического префикса
+                        rawWallpaperBase64 = compressedDataUrl.split(',')[1];
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function sync(id, val) {
+            document.getElementById('hex-' + id).value = val;
+            document.getElementById('pick-' + id).value = val;
+            compileLiveRenderer();
+        }
+
+        function setPreset(accent, bg, header, msgIn, txtIn, txtOut, sideBg, sideTxt, subTxt) {
+            sync('accent', accent);
+            sync('bg', bg);
+            sync('header', header);
+            sync('in', msgIn);
+            sync('text-in', txtIn);
+            sync('text-out', txtOut);
+            sync('side-bg', sideBg);
+            sync('side-txt', sideTxt);
+            sync('sub', subTxt);
+        }
+
+        function generateRandomPalette() {
+            const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            const h = randomColor();
+            setPreset(h, randomColor(), randomColor(), randomColor(), '#ffffff', '#ffffff', randomColor(), '#ffffff', h);
+        }
+
+        function compileLiveRenderer() {
+            const accent = document.getElementById('hex-accent').value;
+            const bg = document.getElementById('hex-bg').value;
+            const header = document.getElementById('hex-header').value;
+            const msgIn = document.getElementById('hex-in').value;
+            const txtIn = document.getElementById('hex-text-in').value;
+            const txtOut = document.getElementById('hex-text-out').value;
+            const sideBg = document.getElementById('hex-side-bg').value;
+            const sideTxt = document.getElementById('hex-side-txt').value;
+            const sub = document.getElementById('hex-sub').value;
+            const rad = document.getElementById('radius-range').value;
+
+            document.documentElement.style.setProperty('--accent-color', accent);
+            if(!rawWallpaperBase64) {
+                document.documentElement.style.setProperty('--bg-main', bg);
+                document.getElementById('phone-bg-preview').style.backgroundImage = 'none';
+            }
+            document.documentElement.style.setProperty('--header-color', header);
+            document.documentElement.style.setProperty('--msg-in', msgIn);
+            document.documentElement.style.setProperty('--text-in', txtIn);
+            document.documentElement.style.setProperty('--text-out', txtOut);
+            document.documentElement.style.setProperty('--sidebar-bg', sideBg);
+            document.documentElement.style.setProperty('--sidebar-text', sideTxt);
+            document.documentElement.style.setProperty('--sub-text', sub);
+            document.documentElement.style.setProperty('--msg-radius', rad + 'px');
+
+            document.getElementById('core-ambient').style.background = `radial-gradient(circle at 70% 20%, ${accent}25 0%, transparent 60%)`;
+        }
+
+        // СБОРКА И ЭКСПОРТ .ATTHEME С ВШИТЫМИ ОБОЯМИ
+        function buildAndExportTheme() {
+            const accent = document.getElementById('hex-accent').value;
+            const bg = document.getElementById('hex-bg').value;
+            const header = document.getElementById('hex-header').value;
+            const msgIn = document.getElementById('hex-in').value;
+            const txtIn = document.getElementById('hex-text-in').value;
+            const txtOut = document.getElementById('hex-text-out').value;
+            const sideBg = document.getElementById('hex-side-bg').value;
+            const sideTxt = document.getElementById('hex-side-txt').value;
+            const sub = document.getElementById('hex-sub').value;
+
+            // Базовая цветовая схема
+            let themeStructure = [
+                `theme_name=Studio_Wallpaper_Pro`,
+                `windowBackgroundGray=${bg}`,
+                `windowBackgroundWhite=${bg}`,
+                `actionBarDefault=${header}`,
+                `actionBarDefaultTitle=#ffffff`,
+                `actionBarDefaultIcon=#ffffff`,
+                `actionBarDefaultSelector=rgba(255,255,255,0.08)`,
+                `chat_wallpaper=${bg}`,
+                `chat_inBubble=${msgIn}`,
+                `chat_inBubbleSelected=${msgIn}`,
+                `chat_inText=${txtIn}`,
+                `chat_outBubble=${accent}`,
+                `chat_outBubbleSelected=${accent}`,
+                `chat_outText=${txtOut}`,
+                `chats_actionBackground=${accent}`,
+                `chats_actionIcon=#ffffff`,
+                `chats_date=${sub}`,
+                `chats_name=#ffffff`,
+                `chats_badge=${accent}`,
+                `chats_badgeText=#ffffff`,
+                `chats_menuBackground=${sideBg}`,
+                `chats_menuItemText=${sideTxt}`,
+                `chats_menuItemIcon=${accent}`,
+                `avatar_backgroundBlue=${accent}`,
+                `avatar_backgroundActionBarBlue=${header}`,
+                `dialogTextGray=${sub}`,
+                `dialogBackground=${sideBg}`,
+                `dialogTextBlack=${sideTxt}`
+            ].join('\n');
+
+            // Ключевой блок: Если картинка загружена, добавляем в конец специальный тег разметки Telegram обоев
+            if (rawWallpaperBase64) {
+                themeStructure += `\nW\n${rawWallpaperBase64}\nE\n`;
+            }
+
+            const logBox = document.getElementById('output-log');
+            logBox.innerText = rawWallpaperBase64 ? themeStructure.substring(0, 500) + "\n...[Код обоев Base64 захеширован для экономии места]..." : themeStructure;
+            logBox.style.display = 'block';
+
+            // Генерация и скачивание
+            const blobFile = new Blob([themeStructure], { type: 'text/plain' });
+            const anchor = document.getElementById('download-anchor');
+            anchor.href = URL.createObjectURL(blobFile);
+            anchor.style.display = 'block';
+            anchor.className = 'action-button';
+            anchor.style.backgroundColor = '#10b981';
+            anchor.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
+            anchor.style.marginTop = '12px';
+            anchor.innerText = "📥 Сохранить тему с обоями (.attheme)";
+        }
+
+        window.onload = function() {
+            compileLiveRenderer();
+        };
+    </script>
+</body>
+</html>
